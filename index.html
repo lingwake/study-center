@@ -1,0 +1,1780 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="学习中心">
+<meta name="theme-color" content="#0f1115">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<title>学习中心</title>
+<style>
+  :root{
+    --primary:#ff6699;
+    --bg:#0f1115;
+    --bg-soft:#171a21;
+    --card:#1c2029;
+    --card-hover:#242a36;
+    --text:#f2f4f8;
+    --text-dim:#9aa3b2;
+    --radius:18px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    overflow-x:hidden;
+    -webkit-user-select:none;user-select:none;
+  }
+  /* ===== 顶部标题栏 ===== */
+  .header{
+    padding:36px 32px 22px;
+    background:linear-gradient(180deg,rgba(255,102,153,.16),transparent);
+    border-bottom:1px solid rgba(255,255,255,.06);
+  }
+  .header h1{
+    font-size:clamp(24px,4vw,40px);
+    font-weight:800;
+    letter-spacing:1px;
+    background:linear-gradient(90deg,var(--primary),#ffb3cc);
+    -webkit-background-clip:text;background-clip:text;
+    -webkit-text-fill-color:transparent;
+  }
+  .header p{margin-top:10px;color:var(--text-dim);font-size:clamp(13px,1.6vw,16px);}
+  .import-btn{
+    margin-top:18px;
+    display:inline-flex;align-items:center;gap:8px;
+    background:linear-gradient(135deg,var(--primary),#ff8fb8);
+    border:none;color:#fff;
+    font-size:14.5px;font-weight:700;
+    padding:11px 20px;border-radius:12px;
+    cursor:pointer;
+    box-shadow:0 10px 26px -12px rgba(255,102,153,.9);
+    transition:transform .15s ease,box-shadow .15s ease;
+  }
+  .import-btn:active{transform:scale(.97);}
+  .install-btn{
+    margin-top:18px;margin-left:12px;
+    display:inline-flex;align-items:center;gap:8px;
+    background:rgba(95,209,138,.15);
+    border:1px solid rgba(95,209,138,.5);
+    color:#5fd18a;
+    font-size:14.5px;font-weight:700;
+    padding:10px 20px;border-radius:12px;
+    cursor:pointer;
+    transition:transform .15s ease,background .15s ease;
+  }
+  .install-btn:active{transform:scale(.97);background:rgba(95,209,138,.3);}
+
+  /* ===== 导入面板 ===== */
+  .import-mask{
+    position:fixed;inset:0;z-index:300;
+    background:rgba(0,0,0,.68);
+    backdrop-filter:blur(3px);
+    display:none;align-items:center;justify-content:center;
+    padding:20px;
+  }
+  .import-mask.show{display:flex;}
+  .import-dialog{
+    width:min(560px,100%);
+    max-height:88vh;
+    background:#181c24;
+    border:1px solid rgba(255,255,255,.1);
+    border-radius:20px;
+    display:flex;flex-direction:column;
+    box-shadow:0 28px 70px -20px rgba(0,0,0,.95);
+    animation:popIn .22s cubic-bezier(.2,.9,.3,1.1);
+  }
+  @keyframes popIn{from{opacity:0;transform:translateY(14px) scale(.97);}to{opacity:1;transform:none;}}
+  .imp-head{
+    flex:0 0 auto;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:20px 22px 14px;
+  }
+  .imp-head-t{font-size:19px;font-weight:800;color:var(--text);}
+  .imp-x{
+    background:rgba(255,255,255,.08);border:none;color:var(--text);
+    width:34px;height:34px;border-radius:10px;
+    display:flex;align-items:center;justify-content:center;cursor:pointer;
+  }
+  .imp-x:active{background:rgba(255,255,255,.2);}
+  .imp-body{
+    flex:1 1 auto;overflow-y:auto;
+    padding:6px 22px 8px;
+    -webkit-overflow-scrolling:touch;
+  }
+  .imp-field{margin-bottom:16px;}
+  .imp-field label{
+    display:block;font-size:13px;font-weight:600;
+    color:var(--text-dim);margin-bottom:8px;
+  }
+  .imp-input-row{display:flex;gap:10px;}
+  .imp-input{
+    flex:1 1 auto;min-width:0;
+    background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.13);
+    border-radius:12px;
+    color:var(--text);font-size:15px;
+    padding:12px 14px;outline:none;
+    transition:border-color .15s ease;
+  }
+  .imp-input::placeholder{color:#616a7a;}
+  .imp-input:focus{border-color:rgba(255,102,153,.65);}
+  .imp-read{
+    flex:0 0 auto;
+    background:rgba(255,102,153,.18);
+    border:1px solid rgba(255,102,153,.5);
+    color:var(--primary);
+    font-size:14.5px;font-weight:700;
+    padding:0 18px;border-radius:12px;cursor:pointer;
+    white-space:nowrap;
+    transition:background .15s ease;
+  }
+  .imp-read:active{background:rgba(255,102,153,.34);}
+  .imp-read:disabled{opacity:.55;cursor:default;}
+  .imp-tip{
+    margin-top:9px;font-size:12px;line-height:1.6;
+    color:#6d7686;
+  }
+  .imp-tip.err{color:#ff8080;}
+  .imp-preview{
+    display:flex;gap:14px;align-items:flex-start;
+    background:rgba(255,255,255,.045);
+    border:1px solid rgba(255,255,255,.09);
+    border-radius:14px;
+    padding:13px;
+    margin-bottom:16px;
+  }
+  .imp-cover{
+    flex:0 0 auto;
+    width:132px;height:82px;border-radius:9px;
+    object-fit:cover;background:#0e1116;
+  }
+  .imp-info{flex:1 1 auto;min-width:0;}
+  .imp-title{
+    font-size:15px;font-weight:700;color:var(--text);
+    line-height:1.45;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  }
+  .imp-meta{margin-top:8px;font-size:12.5px;color:var(--text-dim);line-height:1.7;}
+  .imp-status{
+    font-size:13px;line-height:1.6;min-height:20px;
+    margin-bottom:4px;
+  }
+  .imp-status.ok{color:#5fd18a;}
+  .imp-status.err{color:#ff8080;}
+  .imp-foot{
+    flex:0 0 auto;
+    display:flex;gap:12px;justify-content:flex-end;
+    padding:14px 22px 20px;
+    border-top:1px solid rgba(255,255,255,.07);
+  }
+  .imp-cancel,.imp-confirm{
+    font-size:14.5px;font-weight:700;
+    padding:11px 24px;border-radius:12px;cursor:pointer;
+    border:1px solid transparent;
+  }
+  .imp-cancel{
+    background:rgba(255,255,255,.07);
+    border-color:rgba(255,255,255,.13);
+    color:var(--text-dim);
+  }
+  .imp-confirm{
+    background:linear-gradient(135deg,var(--primary),#ff8fb8);
+    color:#fff;
+  }
+  .imp-confirm:disabled{opacity:.42;cursor:default;}
+  .imp-cancel:active{background:rgba(255,255,255,.16);}
+  .imp-confirm:not(:disabled):active{transform:scale(.97);}
+  /* 卡片删除角标 */
+  .card-del{
+    position:absolute;top:14px;right:94px;
+    width:34px;height:34px;border-radius:10px;
+    background:rgba(255,255,255,.07);
+    border:1px solid rgba(255,255,255,.13);
+    color:var(--text-dim);
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;z-index:2;
+    transition:background .15s ease,color .15s ease;
+  }
+  .card-del:hover{background:rgba(255,80,80,.22);color:#ff8080;}
+  /* 卡片编辑角标 */
+  .card-edit{
+    position:absolute;top:14px;right:56px;
+    width:34px;height:34px;border-radius:10px;
+    background:rgba(255,255,255,.07);
+    border:1px solid rgba(255,255,255,.13);
+    color:var(--text-dim);
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;z-index:2;
+    transition:background .15s ease,color .15s ease;
+  }
+  .card-edit:hover{background:rgba(110,180,255,.22);color:#7ab8ff;}
+  /* ===== 年级分组 ===== */
+  .grade-group{margin:0 0 6px;}
+  .grade-head{
+    display:flex;align-items:center;gap:12px;
+    padding:16px 32px 6px;
+    cursor:pointer;user-select:none;
+    transition:opacity .15s ease;
+  }
+  .grade-head:hover{opacity:.82;}
+  .grade-arrow{
+    width:16px;height:16px;flex:0 0 auto;
+    color:var(--text-dim);
+    transition:transform .22s ease;
+  }
+  .grade-head.collapsed .grade-arrow{transform:rotate(-90deg);}
+  .grade-name{
+    font-size:clamp(16px,2vw,20px);font-weight:800;
+    letter-spacing:.3px;
+  }
+  .grade-count{
+    font-size:12.5px;font-weight:600;
+    color:var(--text-dim);
+    background:rgba(255,255,255,.07);
+    border:1px solid rgba(255,255,255,.1);
+    padding:2px 10px;border-radius:999px;
+  }
+  .grade-line{
+    flex:1;height:1px;
+    background:linear-gradient(90deg,rgba(255,255,255,.14),rgba(255,255,255,0));
+  }
+  .grade-body{padding:8px 0 2px;}
+  .grade-body.hidden{display:none;}
+  /* ===== 卡片网格 ===== */
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+    gap:22px;
+    padding:14px 32px 26px;
+  }
+  .card{
+    position:relative;
+    background:var(--card);
+    border:1px solid rgba(255,255,255,.07);
+    border-radius:var(--radius);
+    padding:26px 24px 24px;
+    cursor:pointer;
+    transition:transform .18s ease,background .18s ease,border-color .18s ease,box-shadow .18s ease;
+    overflow:hidden;
+    min-height:150px;
+    display:flex;flex-direction:column;justify-content:space-between;
+  }
+  .card::before{
+    content:"";
+    position:absolute;inset:0 auto 0 0;width:4px;
+    background:linear-gradient(180deg,var(--primary),#ffb3cc);
+    opacity:.85;
+  }
+  .card:active{transform:scale(.985);background:var(--card-hover);}
+  @media(hover:hover){
+    .card:hover{transform:translateY(-4px);background:var(--card-hover);
+      border-color:rgba(255,102,153,.45);
+      box-shadow:0 14px 34px -14px rgba(255,102,153,.45);}
+  }
+  .badge{
+    display:inline-block;font-size:12px;font-weight:700;
+    color:var(--primary);
+    background:rgba(255,102,153,.13);
+    border:1px solid rgba(255,102,153,.32);
+    padding:4px 11px;border-radius:999px;margin-bottom:14px;
+  }
+  .card h2{font-size:clamp(18px,2.3vw,23px);font-weight:700;line-height:1.35;}
+  .card .desc{margin-top:10px;color:var(--text-dim);font-size:14px;line-height:1.55;}
+  .play-hint{
+    margin-top:18px;display:flex;align-items:center;gap:8px;
+    font-size:13px;color:var(--primary);font-weight:600;
+  }
+  /* ===== 播放层 ===== */
+  .overlay{
+    position:fixed;inset:0;z-index:100;
+    background:#000;
+    display:none;
+    flex-direction:column;
+    opacity:0;
+    transition:opacity .22s ease;
+  }
+  .overlay.show{display:flex;opacity:1;}
+  .overlay-bar{
+    flex:0 0 auto;
+    height:56px;
+    display:flex;align-items:center;gap:14px;
+    padding:0 18px;
+    background:#0b0d11;
+    border-bottom:1px solid rgba(255,255,255,.08);
+  }
+  .back-btn{
+    display:flex;align-items:center;gap:7px;
+    background:rgba(255,255,255,.08);
+    border:none;color:var(--text);
+    padding:9px 16px;border-radius:11px;
+    font-size:15px;font-weight:600;cursor:pointer;
+    transition:background .15s ease;
+  }
+  .back-btn:active{background:rgba(255,255,255,.2);}
+  .overlay-title{
+    font-size:15px;font-weight:600;color:var(--text-dim);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    flex:1 1 auto;
+  }
+  .ep-btn{
+    display:flex;align-items:center;gap:7px;
+    background:rgba(255,102,153,.16);
+    border:1px solid rgba(255,102,153,.42);
+    color:var(--primary);
+    padding:9px 16px;border-radius:11px;
+    font-size:15px;font-weight:600;cursor:pointer;
+    flex:0 0 auto;
+    transition:background .15s ease;
+  }
+  .ep-btn:active{background:rgba(255,102,153,.3);}
+
+  /* ===== 选集面板 ===== */
+  .ep-panel{
+    position:absolute;top:0;right:0;bottom:0;z-index:50;
+    width:min(440px,88vw);
+    background:#14171e;
+    border-left:1px solid rgba(255,255,255,.09);
+    display:flex;flex-direction:column;
+    transform:translateX(102%);
+    transition:transform .26s cubic-bezier(.22,.7,.3,1);
+    box-shadow:-18px 0 48px -18px rgba(0,0,0,.85);
+  }
+  .ep-panel.show{transform:translateX(0);}
+  .ep-head{
+    flex:0 0 auto;
+    display:flex;align-items:flex-start;gap:12px;
+    padding:18px 18px 14px;
+    border-bottom:1px solid rgba(255,255,255,.08);
+    background:linear-gradient(180deg,rgba(255,102,153,.13),transparent);
+  }
+  .ep-head-info{flex:1 1 auto;min-width:0;}
+  .ep-head-title{
+    font-size:16px;font-weight:700;color:var(--text);
+    line-height:1.4;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  }
+  .ep-head-sub{margin-top:6px;font-size:12.5px;color:var(--text-dim);}
+  .ep-close{
+    flex:0 0 auto;
+    background:rgba(255,255,255,.08);border:none;color:var(--text);
+    width:34px;height:34px;border-radius:10px;
+    display:flex;align-items:center;justify-content:center;cursor:pointer;
+  }
+  .ep-close:active{background:rgba(255,255,255,.2);}
+  .ep-tools{
+    flex:0 0 auto;
+    display:flex;align-items:center;gap:10px;
+    padding:12px 18px;
+    border-bottom:1px solid rgba(255,255,255,.06);
+  }
+  .ep-search{
+    flex:1 1 auto;min-width:0;
+    background:rgba(255,255,255,.07);
+    border:1px solid rgba(255,255,255,.12);
+    border-radius:10px;
+    color:var(--text);
+    font-size:14px;
+    padding:9px 13px;
+    outline:none;
+  }
+  .ep-search::placeholder{color:#6b7382;}
+  .ep-search:focus{border-color:rgba(255,102,153,.6);}
+  .ep-count{flex:0 0 auto;font-size:12.5px;color:var(--text-dim);}
+  .ep-hint{
+    flex:0 0 auto;font-size:12px;
+    padding:8px 18px 0;
+    color:#ffd88a;
+  }
+  .refresh-btn{
+    flex:0 0 auto;
+    display:flex;align-items:center;gap:6px;
+    background:rgba(255,102,153,.15);
+    border:1px solid rgba(255,102,153,.42);
+    color:var(--primary);
+    font-size:13px;font-weight:600;
+    padding:8px 12px;border-radius:10px;
+    cursor:pointer;white-space:nowrap;
+    transition:background .15s ease;
+  }
+  .refresh-btn:active{background:rgba(255,102,153,.3);}
+  .refresh-btn:disabled{opacity:.55;cursor:default;}
+  .refresh-btn.spinning svg{animation:spin .9s linear infinite;}
+  /* 卡片上的刷新角标 */
+  .card-refresh{
+    position:absolute;top:14px;right:14px;
+    width:34px;height:34px;border-radius:10px;
+    background:rgba(255,255,255,.07);
+    border:1px solid rgba(255,255,255,.13);
+    color:var(--text-dim);
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;z-index:2;
+    transition:background .15s ease,color .15s ease;
+  }
+  .card-refresh:hover{background:rgba(255,102,153,.2);color:var(--primary);}
+  .card-refresh:active{background:rgba(255,102,153,.35);}
+  .card-refresh.spinning svg{animation:spin .9s linear infinite;}
+  .card-refresh:disabled{opacity:.5;}
+  .ep-list{
+    flex:1 1 auto;overflow-y:auto;
+    padding:10px 12px 24px;
+    -webkit-overflow-scrolling:touch;
+  }
+  .ep-item{
+    display:flex;align-items:center;gap:13px;
+    padding:12px 13px;
+    border-radius:12px;
+    cursor:pointer;
+    transition:background .14s ease;
+    border:1px solid transparent;
+  }
+  .ep-item:active{background:rgba(255,255,255,.09);}
+  @media(hover:hover){
+    .ep-item:hover{background:rgba(255,255,255,.06);}
+  }
+  .ep-item.active{
+    background:rgba(255,102,153,.15);
+    border-color:rgba(255,102,153,.45);
+  }
+  .ep-no{
+    flex:0 0 auto;
+    width:38px;height:38px;border-radius:10px;
+    background:rgba(255,255,255,.07);
+    display:flex;align-items:center;justify-content:center;
+    font-size:13px;font-weight:700;color:var(--text-dim);
+  }
+  .ep-item.active .ep-no{
+    background:var(--primary);color:#fff;
+  }
+  .ep-meta{flex:1 1 auto;min-width:0;}
+  .ep-name{
+    font-size:14.5px;font-weight:600;color:var(--text);
+    line-height:1.45;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+    word-break:break-word;
+  }
+  .ep-dur{margin-top:5px;font-size:12px;color:var(--text-dim);}
+  .ep-playing{
+    flex:0 0 auto;font-size:11.5px;font-weight:700;color:var(--primary);
+    border:1px solid rgba(255,102,153,.5);
+    border-radius:999px;padding:3px 9px;
+  }
+  .ep-empty{
+    padding:40px 20px;text-align:center;color:var(--text-dim);font-size:13.5px;line-height:1.8;
+  }
+  /* 选集面板打开时,播放器宽度让位(宽屏时) */
+  @media(min-width:900px){
+    .overlay.ep-open .stage{margin-right:min(440px,88vw);}
+    .overlay.ep-open .overlay-bar{margin-right:min(440px,88vw);}
+  }
+  .stage{
+    position:relative;flex:1 1 auto;
+    background:#000;overflow:hidden;
+  }
+  .stage iframe{
+    position:absolute;
+    /* 播放器四周外扩，切掉边缘的推荐条 / 分享角标 */
+    top:-56px;left:-8px;
+    width:calc(100% + 16px);
+    height:calc(100% + 108px);
+    border:0;
+    pointer-events:auto;
+  }
+  /* 底部遮罩：压掉播放器底部的标题栏/相关按钮区 */
+  .mask-bottom{
+    position:absolute;left:0;right:0;bottom:0;height:74px;
+    background:linear-gradient(180deg,transparent,#000 62%);
+    pointer-events:none;
+  }
+  /* 右上角遮罩：压掉分享/稍后再看等小图标 */
+  .mask-corner{
+    position:absolute;top:0;right:0;width:130px;height:52px;
+    background:#000;
+    pointer-events:none;
+  }
+  .tip{
+    position:absolute;left:0;right:0;bottom:14px;
+    text-align:center;color:#5c6472;font-size:12px;
+    pointer-events:none;
+  }
+  /* ===== 加载中 / 加载失败兜底 ===== */
+  .loading-tip,.retry-tip{
+    position:absolute;inset:0;z-index:5;
+    display:none;flex-direction:column;
+    align-items:center;justify-content:center;gap:16px;
+    background:#000;text-align:center;
+    font-size:15px;color:#cfd6e0;line-height:1.7;
+    padding:24px;
+  }
+  .retry-tip{background:rgba(0,0,0,.82);}
+  .spinner{
+    width:42px;height:42px;border-radius:50%;
+    border:4px solid rgba(255,255,255,.14);
+    border-top-color:var(--primary);
+    animation:spin 0.9s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .retry-btns{display:flex;gap:12px;margin-top:6px;}
+  .retry-btns button{
+    background:rgba(255,255,255,.1);
+    border:1px solid rgba(255,255,255,.2);
+    color:var(--text);
+    padding:10px 22px;border-radius:12px;
+    font-size:14px;font-weight:600;cursor:pointer;
+  }
+  .retry-btns button:first-child{
+    background:var(--primary);border-color:var(--primary);color:#fff;
+  }
+  .retry-title{font-size:17px;font-weight:700;color:#fff;}
+  .retry-reason{font-size:13px;color:#cfd6e0;line-height:1.7;}
+  /* 移动端 blackboard 播放器模式：精确贴合 + 不加遮罩(它自带界面已较干净) */
+  .stage.mobile-mode iframe{top:0;left:0;width:100%;height:100%;}
+  .stage.mobile-mode .mask-bottom,
+  .stage.mobile-mode .mask-corner{display:none;}
+  .stage.mobile-mode .tip{bottom:10px;}
+  .env-hint{
+    position:fixed;top:0;left:0;right:0;z-index:200;
+    background:#4a3b12;color:#ffd88a;
+    font-size:12.5px;line-height:1.5;
+    padding:8px 14px;text-align:center;
+    border-bottom:1px solid rgba(255,216,138,.3);
+  }
+  .toast{
+    position:fixed;left:50%;bottom:38px;z-index:999;
+    transform:translate(-50%,16px);
+    background:rgba(28,32,41,.97);
+    border:1px solid rgba(255,102,153,.42);
+    color:var(--text);
+    font-size:14px;font-weight:600;
+    padding:12px 22px;border-radius:14px;
+    box-shadow:0 14px 38px -12px rgba(0,0,0,.8);
+    opacity:0;pointer-events:none;
+    transition:opacity .22s ease,transform .22s ease;
+    max-width:82vw;text-align:center;
+  }
+  .toast.show{opacity:1;transform:translate(-50%,0);}
+  .empty{
+    padding:60px 32px;color:var(--text-dim);text-align:center;
+  }
+  /* 横屏时的紧凑处理 */
+  @media(max-height:480px) and (orientation:landscape){
+    .overlay-bar{height:46px;}
+    .stage iframe{top:-46px;height:calc(100% + 92px);}
+  }
+</style>
+</head>
+<body>
+  <div class="header">
+    <h1 id="appName">学习中心</h1>
+    <p id="appSub">点击卡片开始学习 · 纯净播放模式</p>
+    <button class="import-btn" id="importBtn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+      导入视频
+    </button>
+    <button class="import-btn" id="exportBtn" style="display:none;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
+      导出配置
+    </button>
+    <button class="install-btn" id="installBtn" style="display:none;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
+      安装到桌面
+    </button>
+  </div>
+  <div class="grid" id="grid"></div>
+
+  <!-- 导入面板 -->
+  <div class="import-mask" id="importMask">
+    <div class="import-dialog" id="importDialog">
+      <div class="imp-head">
+        <div class="imp-head-t">导入视频</div>
+        <button class="imp-x" id="impX" aria-label="关闭">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <div class="imp-body" id="impBody">
+        <div class="imp-field">
+          <label>视频 BV 号 或 分享链接</label>
+          <div class="imp-input-row">
+            <input class="imp-input" id="impInput" type="text"
+                   placeholder="例如 BV1mkKr6jENy 或粘贴B站分享链接"
+                   autocomplete="off" />
+            <button class="imp-read" id="impRead">读取信息</button>
+          </div>
+          <div class="imp-tip" id="impTip">支持 BV 号、完整链接。短链(b23.tv)可能失效，建议用 BV 号。</div>
+        </div>
+
+        <!-- 读取结果预览 -->
+        <div class="imp-preview" id="impPreview" style="display:none;">
+          <img class="imp-cover" id="impCover" alt="封面" />
+          <div class="imp-info">
+            <div class="imp-title" id="impTitle"></div>
+            <div class="imp-meta" id="impMeta"></div>
+          </div>
+        </div>
+
+        <!-- 可选自定义字段 -->
+        <div class="imp-custom" id="impCustom" style="display:none;">
+          <div class="imp-field">
+            <label>卡片标题（留空用视频原标题）</label>
+            <input class="imp-input" id="impTitleInput" type="text" placeholder="自定义显示标题" />
+          </div>
+          <div class="imp-field">
+            <label>分类标签（留空自动识别）</label>
+            <input class="imp-input" id="impBadgeInput" type="text" placeholder="如：数学 / 语文 / 英语" />
+          </div>
+          <div class="imp-field">
+            <label>所属年级</label>
+            <select class="imp-input" id="impGradeSelect"></select>
+          </div>
+        </div>
+
+        <div class="imp-status" id="impStatus"></div>
+      </div>
+
+      <div class="imp-foot">
+        <button class="imp-cancel" id="impCancel">取消</button>
+        <button class="imp-confirm" id="impConfirm" disabled>确认导入</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 编辑弹窗(改名 / 改分类) ===== -->
+  <div class="import-mask" id="editMask">
+    <div class="import-dialog" id="editDialog">
+      <div class="imp-head">
+        <div class="imp-head-t">编辑视频</div>
+        <button class="imp-x" id="editX" aria-label="关闭">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <div class="imp-body">
+        <div class="imp-field">
+          <label>显示名称</label>
+          <input class="imp-input" id="editTitleInput" type="text" placeholder="卡片上显示的名称" />
+        </div>
+        <div class="imp-field">
+          <label>所属年级</label>
+          <select class="imp-input" id="editGradeSelect"></select>
+        </div>
+        <div class="imp-field">
+          <label>备注（可留空）</label>
+          <input class="imp-input" id="editDescInput" type="text" placeholder="如：长期更新 · 建议先收藏" />
+        </div>
+        <div class="imp-status" id="editStatus"></div>
+      </div>
+
+      <div class="imp-foot">
+        <button class="imp-cancel" id="editCancel">取消</button>
+        <button class="imp-confirm" id="editConfirm">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="overlay">
+    <div class="overlay-bar">
+      <button class="back-btn" id="backBtn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        <span id="backLabel">返回</span>
+      </button>
+      <div class="overlay-title" id="ovTitle"></div>
+      <button class="ep-btn" id="epBtn" style="display:none;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+        选集
+      </button>
+    </div>
+
+    <div class="stage" id="stage">
+      <div class="mask-corner"></div>
+      <div class="mask-bottom"></div>
+      <div class="tip">纯净播放模式 · 长按画面可全屏</div>
+    </div>
+
+    <!-- 选集面板 -->
+    <div class="ep-panel" id="epPanel">
+      <div class="ep-head">
+        <div class="ep-head-info">
+          <div class="ep-head-title" id="epHeadTitle"></div>
+          <div class="ep-head-sub" id="epHeadSub"></div>
+        </div>
+        <button class="ep-close" id="epClose" aria-label="关闭">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="ep-tools">
+        <input class="ep-search" id="epSearch" type="text" placeholder="搜索集数或标题…" />
+        <div class="ep-count" id="epCount"></div>
+        <button class="refresh-btn" id="refreshBtn" title="从B站获取最新集数">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
+          刷新集数
+        </button>
+      </div>
+      <div class="ep-list" id="epList"></div>
+    </div>
+  </div>
+
+<script>
+/* ================= 配置区 =================
+   两种方式二选一：
+   1) 直接用下面的 DEFAULT_CONFIG（离线、单文件即可用）
+   2) 若同目录存在 config.json，会自动读取并覆盖（方便改标题不用动代码）
+============================================ */
+
+/* ===== 内置分集数据(离线兜底) ===== */
+const INLINE_PAGES = {"BV1mkKr6jENy":{"bvid":"BV1mkKr6jENy","title":"【长期更新先收藏】初三数学大合集","owner":"一数-初中版","total":44,"pages":[{"page":1,"title":"一元二次方程核心全解","duration":3104},{"page":2,"title":"韦达定理全题型通关|吃透6大考法","duration":2089},{"page":3,"title":"一元二次方程实际应用5类","duration":1329},{"page":4,"title":"一元二次方程单元测|坑题密集，拔高必备","duration":2666},{"page":5,"title":"【二次函数】图象与性质1","duration":1604},{"page":6,"title":"【二次函数】图象与性质2","duration":1427},{"page":7,"title":"【二次函数】解析式3种","duration":1976},{"page":8,"title":"【二次函数】图系关系与对称平移","duration":3484},{"page":9,"title":"【二次函数】与方程不等式","duration":2643},{"page":10,"title":"【二次函数】实际应用","duration":1517},{"page":11,"title":"【二次函数】区间最值","duration":1427},{"page":12,"title":"【二次函数】线段与面积最值","duration":2620},{"page":13,"title":"【二次函数】角度问题","duration":1826},{"page":14,"title":"【二次函数】三角形四边形存在性","duration":2625},{"page":15,"title":"二次函数多结论压轴杀招|5关大全攻克考题天花板","duration":2403},{"page":16,"title":"【二次函数】新概念探究","duration":1711},{"page":17,"title":"【二次函数】中考压轴题精讲","duration":1191},{"page":18,"title":"反比例函数图象与性质","duration":3256},{"page":19,"title":"反比例函数面积模型-三角形，四边形","duration":2070},{"page":20,"title":"反比例函数压轴面积模型","duration":1811},{"page":21,"title":"反比例函数实际应用3类","duration":2818},{"page":22,"title":"【圆】基本概念及易错小题","duration":560},{"page":23,"title":"【圆】弧，弦，圆心角的关系","duration":513},{"page":24,"title":"【圆】垂径定理及推论","duration":1657},{"page":25,"title":"【圆】圆周角定理","duration":2000},{"page":26,"title":"【圆】点与圆的三种位置关系","duration":526},{"page":27,"title":"【圆】确定圆的条件","duration":923},{"page":28,"title":"【圆】直线与圆的三种位置关系","duration":1013},{"page":29,"title":"【圆】切线的性质与判定","duration":1467},{"page":30,"title":"【圆】切线长定理","duration":1771},{"page":31,"title":"【圆】外接圆与内切圆","duration":982},{"page":32,"title":"【圆】中考超高频重难点？隐圆模型快速上手！","duration":1313},{"page":33,"title":"【圆】中考压轴？阿氏圆","duration":1776},{"page":34,"title":"【圆】瓜豆原理","duration":1424},{"page":35,"title":"【相似】平行线分线段成比例","duration":882},{"page":36,"title":"【相似】相似三角形性质","duration":1117},{"page":37,"title":"【相似】相似三角形判定","duration":1552},{"page":38,"title":"【相似】模型A8型4类","duration":1714},{"page":39,"title":"【相似】射影定理","duration":1064},{"page":40,"title":"【相似模型】一线三垂直","duration":1626},{"page":41,"title":"【相似模型】十字模型","duration":1070},{"page":42,"title":"【相似模型】旋转手拉手","duration":2087},{"page":43,"title":"【相似模型】双高模型","duration":668},{"page":44,"title":"锐角三角函数全章重点速通","duration":2575}]}};
+/* ===== 内置分集数据结束 ===== */
+
+const DEFAULT_CONFIG = {
+  appName: "北师版初三知识复习",
+  subtitle: "点击卡片开始学习 · 纯净播放模式",
+  grades: ["5-6年级", "7-9年级", "高一-高三"],
+  items: [
+    {
+      title: "初三数学大合集",
+      desc: "长期更新 · 建议先收藏 · 共 44 个分P",
+      badge: "数学",
+      bvid: "BV1mkKr6jENy",
+      page: 1,
+      grade: "7-9年级"
+    }
+  ]
+};
+
+/* ---------- 从分享链接/短链里提取 BV 号 ---------- */
+function extractBvid(input){
+  if(!input) return "";
+  const s = String(input).trim();
+  // 1) 直接就是 BV 号
+  let m = s.match(/BV[0-9A-Za-z]{10}/);
+  if(m) return m[0];
+  // 2) av 号（可选项）
+  m = s.match(/av(\d+)/i);
+  if(m) return "av" + m[1];
+  return "";
+}
+
+/* ---------- 渲染 ---------- */
+let DATA = DEFAULT_CONFIG;
+let PAGES = {};          // 分集数据缓存: { "BVxxx": {title, owner, total, pages:[{page,title,duration}]} }
+let currentItem = null;  // 当前播放条目
+
+/* 时长格式化: 3104 -> 51:44 */
+function fmtDur(sec){
+  sec = Math.max(0, parseInt(sec,10) || 0);
+  const h = Math.floor(sec/3600), m = Math.floor((sec%3600)/60), s = sec%60;
+  const pad = n => String(n).padStart(2,"0");
+  return h > 0 ? `${h}:${pad(m)}:${pad(s)}` : `${m}:${pad(s)}`;
+}
+
+/* 取某个 BV 的分集列表(本地 pages.json) */
+function getPages(id){
+  if(!id) return null;
+  const hit = PAGES[id];
+  if(hit && Array.isArray(hit.pages) && hit.pages.length) return hit;
+  return null;
+}
+
+/* ---------- 轻提示(toast) ---------- */
+let toastTimer = null;
+function toast(msg, ms){
+  let el = document.getElementById("toast");
+  if(!el){
+    el = document.createElement("div");
+    el.id = "toast";
+    el.className = "toast";
+    document.body.appendChild(el);
+  }
+  el.textContent = msg;
+  el.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>el.classList.remove("show"), ms || 2600);
+}
+
+/* ---------- 联网刷新集数(需本地 server.py 服务) ---------- */
+let SERVER_OK = null;   // null=未检测 true=可用 false=不可用
+
+/* 探测转发服务是否在运行 */
+async function detectServer(){
+  try{
+    const res = await fetch("/api/pages?bvid=__ping__", {cache:"no-store"});
+    // 服务在(即使返回400也是服务在跑)
+    SERVER_OK = res.status === 400 || res.ok;
+  }catch(e){
+    SERVER_OK = false;
+  }
+  return SERVER_OK;
+}
+
+/* 从B站拉取最新集数并更新本地缓存 */
+async function refreshPages(id, silent){
+  if(SERVER_OK === null) await detectServer();
+  if(!SERVER_OK){
+    if(!silent){
+      alert("【刷新集数需要电脑配合】\n\n"
+          + "当前是离线模式（直接打开文件），浏览器无法直连B站接口。\n\n"
+          + "要刷新集数，请用下面任一方式：\n"
+          + "  ① 电脑上双击 start.bat(或运行 start.sh) 启动服务，\n"
+          + "     再用平板访问它打印出的网址，点刷新即可。\n"
+          + "  ② 在电脑上运行 python3 fetch_pages.py，\n"
+          + "     生成的 pages.json 拷到平板即可更新。\n\n"
+          + "不刷新也不影响使用，您现在看到的集数仍然可以正常播放。");
+    }
+    return false;
+  }
+  const btn = document.getElementById("refreshBtn");
+  if(btn){ btn.disabled = true; btn.classList.add("spinning"); }
+  try{
+    const res = await fetch("/api/pages?bvid=" + encodeURIComponent(id), {cache:"no-store"});
+    const j = await res.json();
+    if(!j.ok) throw new Error(j.error || "接口返回失败");
+    const d = j.data;
+    const old = PAGES[id];
+    PAGES[id] = { bvid:d.bvid, title:d.title, owner:d.owner, total:d.total, pages:d.pages };
+    const changed = !old || old.total !== d.total;
+    d.savedAt = Date.now();
+    try{ localStorage.setItem("bb_pages_cache", JSON.stringify(PAGES)); }catch(e){}
+
+    // 刷新界面
+    render();
+    if(document.getElementById("overlay").classList.contains("show")
+       && document.getElementById("epPanel").classList.contains("show")){
+      openEpisodePanel(currentItem || { title:d.title }, id, false);
+    }
+    // 始终给出反馈(避免"点了没反应"的错觉)
+    if(changed){
+      toast(`集数已更新：${old ? old.total + " → " : ""}${d.total} 集`);
+    }else{
+      toast(`已是最新：共 ${d.total} 集`);
+    }
+    return true;
+  }catch(e){
+    if(!silent) toast("刷新失败：" + e.message, 3600);
+    return false;
+  }finally{
+    const btn2 = document.getElementById("refreshBtn");
+    if(btn2){ btn2.disabled = false; btn2.classList.remove("spinning"); }
+  }
+}
+
+/* 卡片角标: 显示集数 */
+function epBadgeText(id){
+  const p = getPages(id);
+  return (p && p.total > 1) ? `${p.total} 集` : "";
+}
+
+function render(){
+  document.getElementById("appName").textContent = DATA.appName || "学习中心";
+  document.getElementById("appSub").textContent = DATA.subtitle || "";
+  document.title = DATA.appName || "学习中心";
+
+  const grid = document.getElementById("grid");
+  grid.innerHTML = "";
+
+  const items = (DATA.items || []).filter(Boolean);
+  if(!items.length){
+    grid.innerHTML = '<div class="empty">还没有配置视频，请点右上角「＋ 导入视频」添加。</div>';
+    return;
+  }
+
+  // 年级分组(顺序固定;未匹配到分组的一律归入"未分类")
+  const GRADES = (Array.isArray(DATA.grades) && DATA.grades.length)
+    ? DATA.grades.slice()
+    : ["5-6年级", "7-9年级", "高一-高三"];
+  const UNGROUPED = "未分类";
+
+  // 分组归类(保留用户自定义的其它分组名)
+  const order = GRADES.slice();
+  const buckets = {};
+  order.forEach(g=> buckets[g] = []);
+  items.forEach(it=>{
+    const g = (it.grade || "").trim();
+    if(!g){ buckets[UNGROUPED] = buckets[UNGROUPED] || []; buckets[UNGROUPED].push(it); return; }
+    if(!buckets[g]){ buckets[g] = []; order.push(g); }   // 自定义分组自动追加
+    buckets[g].push(it);
+  });
+  // "未分类"排在所有年级之后
+  if(buckets[UNGROUPED] && buckets[UNGROUPED].length) order.push(UNGROUPED);
+
+  // 记录折叠状态
+  const collapseState = window._gradeCollapsed || (window._gradeCollapsed = {});
+
+  order.forEach(g=>{
+    const list = buckets[g] || [];
+    if(!list.length) return;   // 空分组不显示
+
+    const group = document.createElement("section");
+    group.className = "grade-group";
+
+    const collapsed = !!collapseState[g];
+    const head = document.createElement("div");
+    head.className = "grade-head" + (collapsed ? " collapsed" : "");
+    head.innerHTML = `
+      <svg class="grade-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+      <span class="grade-name">${escapeHtml(g)}</span>
+      <span class="grade-count">${list.length} 个</span>
+      <span class="grade-line"></span>
+    `;
+    head.addEventListener("click", ()=>{
+      collapseState[g] = !collapseState[g];
+      head.classList.toggle("collapsed", collapseState[g]);
+      body.classList.toggle("hidden", collapseState[g]);
+    });
+
+    const body = document.createElement("div");
+    body.className = "grade-body" + (collapsed ? " hidden" : "");
+    const sub = document.createElement("div");
+    sub.className = "grid";
+    body.appendChild(sub);
+
+    list.forEach(it=> sub.appendChild(buildCard(it)));
+
+    group.appendChild(head);
+    group.appendChild(body);
+    grid.appendChild(group);
+  });
+}
+
+/* 构建单张卡片 */
+function buildCard(it){
+    const card = document.createElement("div");
+    card.className = "card";
+    const id = extractBvid(it.bvid || it.url || "");
+    const epCount = epBadgeText(id);
+    const pg = getPages(id);
+    card.innerHTML = `
+      <button class="card-refresh" title="从B站获取最新集数" data-bv="${escapeHtml(id)}">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
+      </button>
+      <button class="card-edit" title="编辑名称 / 分类" data-bv="${escapeHtml(id)}">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+      </button>
+      <button class="card-del" title="从列表移除" data-bv="${escapeHtml(id)}" data-title="${escapeHtml(it.title||"")}">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+      </button>
+      ${it.badge ? `<span class="badge">${escapeHtml(it.badge)}</span>` : '<span class="badge">视频</span>'}
+      <h2>${escapeHtml(it.title || (pg && pg.title) || "未命名")}</h2>
+      ${it.desc ? `<div class="desc">${escapeHtml(it.desc)}</div>` : ""}
+      <div class="play-hint">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        ${epCount ? `选择分集 · 共 ${epCount}` : "点击播放"}
+      </div>
+    `;
+    // 卡片本体 → 进入选集/播放
+    card.addEventListener("click", ()=>{
+      const id2 = extractBvid(it.bvid || it.url || "");
+      const p = getPages(id2);
+      if(p && p.total > 1){
+        openPlayerShell(it, id2);
+        openEpisodePanel(it, id2, true);
+      }else{
+        openVideo(it, id2, 1);
+      }
+    });
+    // 刷新按钮
+    const rf = card.querySelector(".card-refresh");
+    if(rf){
+      rf.addEventListener("click", async (e)=>{
+        e.stopPropagation();
+        rf.disabled = true; rf.classList.add("spinning");
+        await refreshPages(rf.dataset.bv, false);
+        rf.disabled = false; rf.classList.remove("spinning");
+      });
+    }
+    // 编辑按钮
+    const ed = card.querySelector(".card-edit");
+    if(ed){
+      ed.addEventListener("click", (e)=>{
+        e.stopPropagation();
+        openEdit(it);
+      });
+    }
+    // 删除按钮
+    const del = card.querySelector(".card-del");
+    if(del){
+      del.addEventListener("click", (e)=>{
+        e.stopPropagation();
+        deleteVideo(del.dataset.bv, del.dataset.title);
+      });
+    }
+    return card;
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, c=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+}
+
+/* ---------- 打开播放层外壳(不加载视频,用于选集界面) ---------- */
+function openPlayerShell(item, id){
+  const overlay = document.getElementById("overlay");
+  const stage = document.getElementById("stage");
+  currentItem = item;
+  document.getElementById("ovTitle").textContent = item.title || "";
+
+  // 清掉旧内容
+  stage.querySelectorAll("iframe").forEach(f=>f.remove());
+  const oldWarn = stage.querySelector(".empty-warn");
+  if(oldWarn) oldWarn.remove();
+
+  // 显示"选集"按钮(仅当有分集数据)
+  const epBtn = document.getElementById("epBtn");
+  const p = getPages(id);
+  epBtn.style.display = (p && p.total > 1) ? "flex" : "none";
+
+  if(!overlay.classList.contains("show")){
+    overlay.classList.add("show");
+    history.pushState({ player:true }, "");
+  }
+  document.body.style.overflow = "hidden";
+}
+
+/* ---------- 播放(支持指定集数 pageNo) ---------- */
+function openVideo(item, id, pageNo){
+  const overlay = document.getElementById("overlay");
+  const stage = document.getElementById("stage");
+  const page = parseInt(pageNo, 10) || parseInt(item.page, 10) || 1;
+
+  currentItem = item;
+  document.getElementById("ovTitle").textContent = item.title || "";
+
+  // 关闭选集面板(如果开着)
+  closeEpisodePanel();
+
+  // 清掉旧的 iframe
+  stage.querySelectorAll("iframe").forEach(f=>f.remove());
+  const oldWarn = stage.querySelector(".empty-warn");
+  if(oldWarn) oldWarn.remove();
+
+  if(!id){
+    const warn = document.createElement("div");
+    warn.className = "empty-warn";
+    warn.style.position = "absolute";
+    warn.style.inset = "0";
+    warn.style.display = "flex";
+    warn.style.alignItems = "center";
+    warn.style.justifyContent = "center";
+    warn.style.color = "#9aa3b2";
+    warn.style.textAlign = "center";
+    warn.innerHTML = "未识别到有效的 BV 号<br><span style='font-size:13px'>请在配置里填写 BV 号或完整分享链接</span>";
+    stage.appendChild(warn);
+    if(!overlay.classList.contains("show")){
+      overlay.classList.add("show");
+      history.pushState({ player:true }, "");
+    }
+    document.body.style.overflow = "hidden";
+    return;
+  }
+
+  const isAv = id.startsWith("av");
+  const param = isAv ? `aid=${id.slice(2)}` : `bvid=${id}`;
+
+  /* 关键修复:按设备UA选择嵌入通道
+     - 移动端UA(Android/iPad):B站会拒绝 player.bilibili.com 内嵌(显示"你感兴趣的视频都在B站"占位页)
+       → 必须改用 blackboard/html5mobileplayer.html,实测可正常播放
+     - 桌面UA:player.bilibili.com 正常,且支持自动播放 */
+  const isMobileUA = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+
+  let src, playerUrlForPreflight;
+  if(isMobileUA){
+    stage.classList.add("mobile-mode");
+    const pageQ = (page && page > 1) ? `&p=${page}` : "";
+    src = `https://www.bilibili.com/blackboard/html5mobileplayer.html?${param}${pageQ}`;
+    playerUrlForPreflight = "https://www.bilibili.com/blackboard/html5mobileplayer.html";
+  }else{
+    stage.classList.remove("mobile-mode");
+    const pageParam2 = (page && page > 1) ? `&p=${page}` : "";
+    src = `https://player.bilibili.com/player.html?${param}${pageParam2}`
+      + `&autoplay=1&danmaku=1&high_quality=1&as_wide=1`;
+    playerUrlForPreflight = "https://player.bilibili.com/player.html";
+  }
+
+  const iframe = document.createElement("iframe");
+  iframe.src = src;
+  iframe.allow = "autoplay; fullscreen; encrypted-media; picture-in-picture";
+  iframe.setAttribute("scrolling","no");
+  iframe.setAttribute("frameborder","0");
+  /* 注意：不要加 sandbox 属性 —— 会阻断B站播放器的存储/指纹上报，导致黑屏卡死 */
+  stage.appendChild(iframe);
+
+  // 显示"选集"按钮 + 更新标题(带集数)
+  const epBtn = document.getElementById("epBtn");
+  const pgs = getPages(id);
+  const hasEps = pgs && pgs.total > 1;
+  epBtn.style.display = hasEps ? "flex" : "none";
+  if(hasEps){
+    const ep = (pgs.pages || []).find(x=>x.page === page);
+    const epName = ep ? ep.title : "";
+    document.getElementById("ovTitle").textContent =
+      `${item.title || pgs.title}　·　第${page}集${epName ? " " + epName : ""}`;
+  }else{
+    document.getElementById("ovTitle").textContent = item.title || "";
+  }
+
+  // 记录当前集数，供选集面板高亮
+  overlay.dataset.currentEp = String(page);
+  overlay.dataset.currentId = id;
+
+  /* 加载反馈 + 三重健康检测 */
+  showLoading(item);
+  let loaded = false;
+  iframe.addEventListener("load", ()=>{
+    loaded = true;
+    hideLoading();
+  }, { once:true });
+
+  /* 检测1: 网络预检 —— 断网/防火墙/DNS故障立刻暴露 */
+  preflight(playerUrlForPreflight).then(ok=>{
+    if(!ok){
+      clearTimeout(loadTimer);
+      showRetry(item, src, "网络无法连接到哔哩哔哩播放器");
+    }
+  });
+
+  /* 检测2: 12秒仍未加载 → 超时兜底 */
+  clearTimeout(loadTimer);
+  loadTimer = setTimeout(()=>{
+    if(!loaded){
+      showRetry(item, src, "加载超时(超过12秒无响应)");
+    }
+  }, 12000);
+
+  if(!overlay.classList.contains("show")){
+    overlay.classList.add("show");
+    history.pushState({ player:true }, "");
+  }
+  document.body.style.overflow = "hidden";
+}
+
+let loadTimer = null;
+
+/* ---------- 导入视频 ---------- */
+let impPreviewData = null;   // 当前读取到的视频信息
+
+function openImport(){
+  document.getElementById("importMask").classList.add("show");
+  document.getElementById("impInput").value = "";
+  document.getElementById("impTitleInput").value = "";
+  document.getElementById("impBadgeInput").value = "";
+  // 填充年级下拉
+  const GRADES = (Array.isArray(DATA.grades) && DATA.grades.length)
+    ? DATA.grades.slice()
+    : ["5-6年级", "7-9年级", "高一-高三"];
+  const gsel = document.getElementById("impGradeSelect");
+  gsel.innerHTML = ['<option value="">未分类</option>']
+    .concat(GRADES.map(g=>`<option value="${escapeHtml(g)}">${escapeHtml(g)}</option>`))
+    .join("");
+  document.getElementById("impPreview").style.display = "none";
+  document.getElementById("impCustom").style.display = "none";
+  document.getElementById("impConfirm").disabled = true;
+  document.getElementById("impStatus").textContent = "";
+  document.getElementById("impStatus").className = "imp-status";
+  impPreviewData = null;
+  setTimeout(()=>document.getElementById("impInput").focus(), 120);
+  // 检查服务是否可用
+  if(SERVER_OK === null) detectServer();
+}
+
+function closeImport(){
+  document.getElementById("importMask").classList.remove("show");
+}
+
+function setImpStatus(msg, cls){
+  const el = document.getElementById("impStatus");
+  el.textContent = msg || "";
+  el.className = "imp-status" + (cls ? " " + cls : "");
+}
+
+/* 读取视频信息 */
+async function readVideoInfo(){
+  const raw = document.getElementById("impInput").value.trim();
+  if(!raw){ setImpStatus("请先填写 BV 号或分享链接", "err"); return; }
+
+  if(SERVER_OK === null) await detectServer();
+  if(!SERVER_OK){
+    setImpStatus("导入功能需要电脑上的服务在运行。\n请先启动 start.bat，再用平板访问服务网址打开本页。", "err");
+    return;
+  }
+
+  const btn = document.getElementById("impRead");
+  btn.disabled = true;
+  setImpStatus("正在读取视频信息…");
+  try{
+    const res = await fetch("/api/preview?q=" + encodeURIComponent(raw), {cache:"no-store"});
+    const j = await res.json();
+    if(!j.ok) throw new Error(j.error || "读取失败");
+    const d = j.data;
+    impPreviewData = d;
+
+    // 填充预览
+    document.getElementById("impCover").src = d.pic || "";
+    document.getElementById("impTitle").textContent = d.title;
+    const mins = Math.round((d.duration||0)/60);
+    document.getElementById("impMeta").innerHTML =
+      `UP主：${escapeHtml(d.owner || "未知")}<br>`
+      + `共 <b style="color:#ff6699">${d.total}</b> ${d.total > 1 ? "集" : "个"}`
+      + ` · 总时长约 ${mins} 分钟`
+      + (d.tname ? `<br>分区：${escapeHtml(d.tname)}` : "");
+    document.getElementById("impPreview").style.display = "flex";
+    document.getElementById("impCustom").style.display = "block";
+
+    // 预填自定义字段(标题留空表示用原标题,这里给出提示性 placeholder)
+    document.getElementById("impTitleInput").placeholder = d.title;
+    document.getElementById("impConfirm").disabled = false;
+
+    // 检查是否已存在
+    const exists = (DATA.items || []).some(it=>extractBvid(it.bvid || it.url || "") === d.bvid);
+    if(exists){
+      setImpStatus("⚠ 这个视频已经在列表里了，可先在卡片上删除后再导入", "err");
+      document.getElementById("impConfirm").disabled = true;
+    }else{
+      setImpStatus("✓ 读取成功，确认无误后点「确认导入」", "ok");
+    }
+  }catch(e){
+    setImpStatus("读取失败：" + e.message, "err");
+    document.getElementById("impPreview").style.display = "none";
+    document.getElementById("impCustom").style.display = "none";
+    document.getElementById("impConfirm").disabled = true;
+  }finally{
+    btn.disabled = false;
+  }
+}
+
+/* 确认导入 */
+async function confirmImport(){
+  if(!impPreviewData) return;
+  const btn = document.getElementById("impConfirm");
+  btn.disabled = true;
+  setImpStatus("正在导入…");
+  try{
+    const res = await fetch("/api/import", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({
+        q: impPreviewData.bvid,
+        title: document.getElementById("impTitleInput").value.trim(),
+        badge: document.getElementById("impBadgeInput").value.trim(),
+        grade: document.getElementById("impGradeSelect").value.trim(),
+      })
+    });
+    const j = await res.json();
+    if(!j.ok) throw new Error(j.error || "导入失败");
+
+    // 同步分集数据
+    try{
+      const p = await fetch("/api/pages?bvid=" + encodeURIComponent(impPreviewData.bvid), {cache:"no-store"});
+      const pj = await p.json();
+      if(pj.ok) PAGES[impPreviewData.bvid] = pj.data;
+      try{ localStorage.setItem("bb_pages_cache", JSON.stringify(PAGES)); }catch(e){}
+    }catch(e){}
+
+    // 更新界面
+    DATA = j.data;
+    render();
+    closeImport();
+    toast(`已导入：${impPreviewData.title}`);
+  }catch(e){
+    setImpStatus("导入失败：" + e.message, "err");
+    btn.disabled = false;
+  }
+}
+
+/* ---------- 编辑视频(改名 / 改分类 / 改备注) ---------- */
+let editTarget = null;
+
+function openEdit(it){
+  const id = extractBvid(it.bvid || it.url || "");
+  if(!id) return;
+  editTarget = { id, item: it };
+
+  document.getElementById("editTitleInput").value = it.title || "";
+  document.getElementById("editDescInput").value  = it.desc  || "";
+
+  // 填充年级下拉
+  const GRADES = (Array.isArray(DATA.grades) && DATA.grades.length)
+    ? DATA.grades.slice()
+    : ["5-6年级", "7-9年级", "高一-高三"];
+  const sel = document.getElementById("editGradeSelect");
+  const cur = (it.grade || "").trim();
+
+  // 收集现有所有分组(含未分类)
+  let all = GRADES.slice();
+  (DATA.items || []).forEach(x=>{
+    const g = (x.grade || "").trim();
+    if(g && all.indexOf(g) < 0) all.push(g);
+  });
+  if(all.indexOf("未分类") < 0) all.push("未分类");
+
+  sel.innerHTML = all.map(g=>
+    `<option value="${escapeHtml(g)}"${g === cur ? " selected" : ""}>${escapeHtml(g)}</option>`
+  ).join("");
+
+  document.getElementById("editStatus").textContent = "";
+  document.getElementById("editStatus").className = "imp-status";
+  document.getElementById("editMask").classList.add("show");
+  setTimeout(()=>document.getElementById("editTitleInput").focus(), 120);
+}
+
+function closeEdit(){
+  document.getElementById("editMask").classList.remove("show");
+  editTarget = null;
+}
+
+async function saveEdit(){
+  if(!editTarget) return;
+  const btn = document.getElementById("editConfirm");
+  const status = document.getElementById("editStatus");
+  btn.disabled = true;
+  status.textContent = "正在保存…";
+  status.className = "imp-status";
+
+  const title = document.getElementById("editTitleInput").value.trim();
+  const grade = document.getElementById("editGradeSelect").value.trim();
+  const desc  = document.getElementById("editDescInput").value.trim();
+
+  if(!title){
+    status.textContent = "名称不能为空";
+    status.className = "imp-status err";
+    btn.disabled = false;
+    return;
+  }
+
+  try{
+    if(SERVER_OK === null) await detectServer();
+
+    // —— 无后端(离线/静态托管):本地保存到本设备 ——
+    if(!SERVER_OK){
+      const items = (DATA.items || []).slice();
+      const hit = items.find(x=> extractBvid(x.bvid || x.url || "") === editTarget.id);
+      if(!hit) throw new Error("没找到这个视频");
+      hit.title = title; hit.grade = grade; hit.desc = desc;
+      DATA = { ...DATA, items };
+      try{ localStorage.setItem("bb_config_local", JSON.stringify(DATA)); }catch(e){}
+      render(); closeEdit();
+      toast("已保存（本设备）：" + title);
+      btn.disabled = false;
+      return;
+    }
+
+    const res = await fetch("/api/edit", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({ bvid: editTarget.id, title, grade, desc })
+    });
+    const j = await res.json();
+    if(!j.ok) throw new Error(j.error || "保存失败");
+    DATA = j.data;
+    render();
+    closeEdit();
+    toast("已保存：" + title);
+  }catch(e){
+    status.textContent = "保存失败：" + e.message;
+    status.className = "imp-status err";
+    btn.disabled = false;
+  }
+}
+
+/* 从列表删除一个视频 */
+async function deleteVideo(id, title){
+  if(!confirm(`确定要从列表里删除吗？\n\n${title || id}\n\n（只是从首页移除，不影响B站上的视频）`)) return;
+  try{
+    const res = await fetch("/api/delete", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({ bvid:id })
+    });
+    const j = await res.json();
+    if(!j.ok) throw new Error(j.error || "删除失败");
+    DATA = j.data;
+    render();
+    toast("已从列表移除");
+  }catch(e){
+    toast("删除失败：" + e.message, 3600);
+  }
+}
+
+document.getElementById("importBtn").addEventListener("click", openImport);
+
+/* 导出配置(下载 config.json，可存回 GitHub 实现持久化) */
+document.getElementById("exportBtn").addEventListener("click", ()=>{
+  window.location.href = "/api/export";
+  toast("正在下载 config.json，可存回 GitHub 仓库");
+});
+document.getElementById("impX").addEventListener("click", closeImport);
+document.getElementById("impCancel").addEventListener("click", closeImport);
+document.getElementById("impRead").addEventListener("click", readVideoInfo);
+document.getElementById("impConfirm").addEventListener("click", confirmImport);
+document.getElementById("impInput").addEventListener("keydown", (e)=>{
+  if(e.key === "Enter") readVideoInfo();
+});
+document.getElementById("importMask").addEventListener("click", (e)=>{
+  if(e.target.id === "importMask") closeImport();
+});
+
+/* 编辑弹窗事件 */
+document.getElementById("editX").addEventListener("click", closeEdit);
+document.getElementById("editCancel").addEventListener("click", closeEdit);
+document.getElementById("editConfirm").addEventListener("click", saveEdit);
+document.getElementById("editMask").addEventListener("click", (e)=>{
+  if(e.target.id === "editMask") closeEdit();
+});
+document.getElementById("editTitleInput").addEventListener("keydown", (e)=>{
+  if(e.key === "Enter") saveEdit();
+});
+
+/* ---------- 选集面板 ---------- */
+function openEpisodePanel(item, id, isInitial){
+  const overlay = document.getElementById("overlay");
+  const panel = document.getElementById("epPanel");
+  const pg = getPages(id);
+
+  if(!pg){
+    // 没有分集数据:给出提示(仅在用户主动点"选集"时)
+    if(!isInitial) alert("这个视频没有分集数据。\n请在电脑上运行 fetch_pages.py 生成 pages.json 后一起拷到平板。");
+    return;
+  }
+
+  document.getElementById("epHeadTitle").textContent = pg.title || item.title || "";
+  const ownerTxt = pg.owner ? `UP主：${pg.owner} · ` : "";
+  let stamp = "";
+  try{
+    if(pg.savedAt){
+      const dt = new Date(pg.savedAt);
+      const p2 = n=>String(n).padStart(2,"0");
+      stamp = ` · 更新于 ${dt.getMonth()+1}/${dt.getDate()} ${p2(dt.getHours())}:${p2(dt.getMinutes())}`;
+    }
+  }catch(e){}
+  document.getElementById("epHeadSub").textContent = `${ownerTxt}共 ${pg.total} 集${stamp}`;
+
+  overlay.dataset.currentId = id;
+  renderEpisodeList(id, "");
+
+  // 打开播放层外壳(若尚未打开)
+  if(!overlay.classList.contains("show")) openPlayerShell(item, id);
+
+  panel.classList.add("show");
+  overlay.classList.add("ep-open");
+
+  document.getElementById("epSearch").value = "";
+  const curEp = String(parseInt(overlay.dataset.currentEp,10) || 1);
+  const active = document.querySelector(".ep-item.active");
+  if(active) active.scrollIntoView({block:"center"});
+}
+
+function closeEpisodePanel(){
+  document.getElementById("epPanel").classList.remove("show");
+  document.getElementById("overlay").classList.remove("ep-open");
+}
+
+function renderEpisodeList(id, keyword){
+  const pg = getPages(id);
+  const list = document.getElementById("epList");
+  if(!pg){ list.innerHTML = '<div class="ep-empty">没有分集数据</div>'; return; }
+
+  const kw = (keyword || "").trim().toLowerCase();
+  const curEp = parseInt(document.getElementById("overlay").dataset.currentEp, 10) || 0;
+
+  const items = (pg.pages || []).filter(p=>{
+    if(!kw) return true;
+    return String(p.page) === kw
+        || String(p.page) === kw.replace(/^p/i,"")
+        || (p.title || "").toLowerCase().includes(kw);
+  });
+
+  const cntEl = document.getElementById("epCount");
+  if(cntEl){
+    cntEl.textContent = kw ? `${items.length}/${pg.total} 集` : `共 ${pg.total} 集`;
+  }
+
+  if(!items.length){
+    list.innerHTML = '<div class="ep-empty">没有匹配的集数</div>';
+    return;
+  }
+
+  list.innerHTML = "";
+  items.forEach(p=>{
+    const el = document.createElement("div");
+    el.className = "ep-item" + (p.page === curEp ? " active" : "");
+    el.innerHTML = `
+      <div class="ep-no">P${p.page}</div>
+      <div class="ep-meta">
+        <div class="ep-name">${escapeHtml(p.title || ("第" + p.page + "集"))}</div>
+        <div class="ep-dur">${fmtDur(p.duration)}</div>
+      </div>
+      ${p.page === curEp ? '<div class="ep-playing">播放中</div>' : ""}
+    `;
+    el.addEventListener("click", ()=>{
+      const it = currentItem || { title: pg.title };
+      openVideo(it, id, p.page);   // 会自动关闭选集面板
+    });
+    list.appendChild(el);
+  });
+}
+
+// 选集面板交互绑定
+document.getElementById("epBtn").addEventListener("click", ()=>{
+  const overlay = document.getElementById("overlay");
+  const id = overlay.dataset.currentId;
+  const item = currentItem || {};
+  if(document.getElementById("epPanel").classList.contains("show")){
+    closeEpisodePanel();
+  }else{
+    openEpisodePanel(item, id, false);
+  }
+});
+document.getElementById("epClose").addEventListener("click", closeEpisodePanel);
+document.getElementById("epSearch").addEventListener("input", (e)=>{
+  const id = document.getElementById("overlay").dataset.currentId;
+  renderEpisodeList(id, e.target.value);
+});
+document.getElementById("refreshBtn").addEventListener("click", async ()=>{
+  const id = document.getElementById("overlay").dataset.currentId;
+  if(!id) return;
+  await refreshPages(id, false);
+});
+
+/* 网络预检：no-cors 探测能否连通B站播放器(跨源下唯一可靠的网络层信号) */
+function preflight(url){
+  return new Promise(resolve=>{
+    try{
+      const ctl = new AbortController();
+      const t = setTimeout(()=>{ ctl.abort(); resolve(false); }, 8000);
+      fetch(url || "https://player.bilibili.com/player.html", {mode:"no-cors", cache:"no-store", signal:ctl.signal})
+        .then(()=>{ clearTimeout(t); resolve(true); })
+        .catch(()=>{ clearTimeout(t); resolve(false); });
+    }catch(e){ resolve(false); }
+  });
+}
+
+/* 环境自检：本页自己被嵌在 iframe 里(如预览面板)时提示 */
+  (function(){
+    try{
+      if(window.self !== window.top){
+        const bar = document.createElement("div");
+        bar.className = "env-hint";
+        bar.innerHTML = "检测到当前运行在内嵌预览中，B站播放器可能被拦截 —— 若黑屏请用浏览器直接打开本页";
+        document.body.appendChild(bar);
+      }
+    }catch(e){}
+  })();
+
+const watchUrl = (id, page)=>{
+  const p = (page && page > 1) ? `?p=${page}` : "";
+  return `https://www.bilibili.com/video/${id}${p}`;
+};
+
+function showLoading(item){
+  let el = document.getElementById("loadingTip");
+  if(!el){
+    el = document.createElement("div");
+    el.id = "loadingTip";
+    el.className = "loading-tip";
+    el.innerHTML = `<div class="spinner"></div><div class="loading-text">正在加载播放器…</div>`;
+    document.getElementById("stage").appendChild(el);
+  }
+  el.style.display = "flex";
+  el.querySelector(".loading-text").textContent = `正在加载「${item.title||""}」…`;
+}
+function hideLoading(){
+  const el = document.getElementById("loadingTip");
+  if(el) el.style.display = "none";
+}
+function showRetry(item, src, reason){
+  let el = document.getElementById("retryTip");
+  if(!el){
+    el = document.createElement("div");
+    el.id = "retryTip";
+    el.className = "retry-tip";
+    el.innerHTML = `
+      <div class="retry-title">播放器加载失败</div>
+      <div class="retry-reason"></div>
+      <div class="retry-btns">
+        <button id="retryBtn">重试</button>
+        <button id="openExtBtn">用浏览器打开</button>
+        <button id="dismissBtn">画面正常,关闭提示</button>
+      </div>`;
+    document.getElementById("stage").appendChild(el);
+    el.querySelector("#retryBtn").addEventListener("click", ()=>{
+      el.style.display = "none";
+      const f = document.querySelector(".stage iframe");
+      if(f){ const s = f.src; f.src = "about:blank"; setTimeout(()=>f.src = s, 60); showLoading(item); }
+    });
+    el.querySelector("#openExtBtn").addEventListener("click", ()=>{
+      window.open(watchUrl(extractBvid(item.bvid||item.url||""), item.page), "_blank");
+    });
+    el.querySelector("#dismissBtn").addEventListener("click", ()=>{
+      el.style.display = "none";
+    });
+  }
+  el.querySelector(".retry-reason").innerHTML =
+    escapeHtml(reason || "原因未明") + "<br><span style='font-size:12px;color:#5c6472'>若当前在内嵌预览中,请改用浏览器打开本页</span>";
+  el.style.display = "flex";
+}
+
+function closeVideo(){
+  const overlay = document.getElementById("overlay");
+  const stage = document.getElementById("stage");
+  if(!overlay.classList.contains("show")) return;
+  closeEpisodePanel();
+  overlay.classList.remove("show");
+  document.body.style.overflow = "";
+  clearTimeout(loadTimer);
+  hideLoading();
+  const rt = document.getElementById("retryTip");
+  if(rt) rt.style.display = "none";
+  // 延迟移除，避免关闭动画时黑屏闪烁
+  setTimeout(()=>{ stage.querySelectorAll("iframe").forEach(f=>f.remove()); }, 240);
+  // 消费掉打开时压入的历史记录，保证平板返回键行为正确
+  if(history.state && history.state.player){
+    history.back();
+  }
+}
+
+document.getElementById("backBtn").addEventListener("click", ()=>{
+  // 选集面板开着时,返回键先关面板
+  if(document.getElementById("epPanel").classList.contains("show")){
+    closeEpisodePanel();
+    return;
+  }
+  closeVideo();
+});
+
+/* 平板上物理返回键 / 浏览器返回：优先关闭选集面板,再关闭播放层 */
+window.addEventListener("popstate", ()=>{
+  const overlay = document.getElementById("overlay");
+  if(document.getElementById("epPanel").classList.contains("show")){
+    closeEpisodePanel();
+    return;
+  }
+  if(overlay.classList.contains("show")){
+    // 直接走 UI 关闭，不再触发 history.back（此时已经是返回动作本身）
+    overlay.classList.remove("show");
+    document.body.style.overflow = "";
+    clearTimeout(loadTimer);
+    hideLoading();
+    const rt = document.getElementById("retryTip");
+    if(rt) rt.style.display = "none";
+    const stage = document.getElementById("stage");
+    setTimeout(()=>{ stage.querySelectorAll("iframe").forEach(f=>f.remove()); }, 240);
+  }
+});
+
+/* 右键 / 长按菜单屏蔽，保持画面干净 */
+document.addEventListener("contextmenu", e=>e.preventDefault());
+
+/* ---------- PWA：Service Worker + 安装到桌面 ---------- */
+if("serviceWorker" in navigator && location.protocol !== "file:"){
+  navigator.serviceWorker.register("sw.js").catch(()=>{});
+}
+
+/* 捕获浏览器的"可安装"事件，显示安装按钮 */
+let deferredPrompt = null;
+window.addEventListener("beforeinstallprompt", (e)=>{
+  e.preventDefault();
+  deferredPrompt = e;
+  const btn = document.getElementById("installBtn");
+  if(btn) btn.style.display = "inline-flex";
+});
+document.getElementById("installBtn").addEventListener("click", async ()=>{
+  if(!deferredPrompt) return;
+  deferredPrompt.prompt();
+  const choice = await deferredPrompt.userChoice;
+  if(choice && choice.outcome === "accepted"){
+    toast("已安装到桌面，下次点图标直接打开");
+  }
+  deferredPrompt = null;
+  document.getElementById("installBtn").style.display = "none";
+});
+/* 已安装则不显示按钮 */
+window.addEventListener("appinstalled", ()=>{
+  document.getElementById("installBtn").style.display = "none";
+});
+
+/* ---------- PWA 结束 ---------- */
+
+/* ---------- 加载外部配置与分集数据 ---------- */
+(async function loadAll(){
+  // 1) 优先读后端配置(云端 DATA_DIR 场景下以服务端为准);失败则退回静态 config.json
+  let loaded = false;
+  try{
+    const r = await fetch("/api/config", {cache:"no-store"});
+    if(r.ok){
+      const j = await r.json();
+      if(j && j.ok && j.data && typeof j.data === "object"){
+        DATA = { ...DEFAULT_CONFIG, ...j.data,
+                 items: (j.data.items && j.data.items.length) ? j.data.items : DEFAULT_CONFIG.items };
+        loaded = true;
+      }
+    }
+  }catch(e){}
+  if(!loaded){
+    try{
+      // 本设备本地保存的改动(离线模式编辑后)
+      const local = localStorage.getItem("bb_config_local");
+      if(local){
+        const lc = JSON.parse(local);
+        if(lc && typeof lc === "object" && lc.items){
+          DATA = { ...DEFAULT_CONFIG, ...lc };
+          loaded = true;
+        }
+      }
+    }catch(e){}
+  }
+  if(!loaded){
+    try{
+      const res = await fetch("config.json", {cache:"no-store"});
+      if(res.ok){
+        const cfg = await res.json();
+        if(cfg && typeof cfg === "object"){
+          DATA = { ...DEFAULT_CONFIG, ...cfg,
+                   items: (cfg.items && cfg.items.length) ? cfg.items : DEFAULT_CONFIG.items };
+        }
+      }
+    }catch(e){ /* 离线打开 file:// 时会失败，用内置配置 */ }
+  }
+
+  // 2) 内置分集数据兜底(保证 file:// 直接打开也能用)
+  try{
+    if(typeof INLINE_PAGES === "object" && INLINE_PAGES) PAGES = { ...INLINE_PAGES };
+  }catch(e){}
+
+  // 3) 同目录 pages.json 覆盖(脚本更新后自动生效)
+  try{
+    const res2 = await fetch("pages.json", {cache:"no-store"});
+    if(res2.ok){
+      const pg = await res2.json();
+      if(pg && typeof pg === "object" && Object.keys(pg).length) PAGES = pg;
+    }
+  }catch(e){ /* 没有分集数据时,退化为"点击直接播放" */ }
+
+  // 4) 最后用"平板点刷新"得到的最新缓存覆盖(优先级最高)
+  try{
+    const cached = localStorage.getItem("bb_pages_cache");
+    if(cached){
+      const c = JSON.parse(cached);
+      if(c && typeof c === "object"){
+        Object.keys(c).forEach(k=>{
+          if(c[k] && c[k].pages && c[k].pages.length) PAGES[k] = c[k];
+        });
+      }
+    }
+  }catch(e){}
+
+  render();
+
+  // 5) 后台探测刷新服务是否可用(不阻塞界面)
+  detectServer().then(ok=>{
+    // 有后端时才显示"导出配置"按钮
+    const eb = document.getElementById("exportBtn");
+    if(eb && ok) eb.style.display = "inline-flex";
+  });
+})();
+</script>
+</body>
+</html>
