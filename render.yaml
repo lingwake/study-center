@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: study-center
+    runtime: python
+    plan: free
+    region: singapore
+    branch: main
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "python3 server.py"
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.0"
